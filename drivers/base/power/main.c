@@ -1559,22 +1559,10 @@ static int device_prepare(struct device *dev, pm_message_t state)
 
 	device_unlock(dev);
 
-	if (ret < 0) {
-		suspend_report_result(callback, ret);
+	if (error)
 		pm_runtime_put(dev);
-		return ret;
-	}
-	/*
-	 * A positive return value from ->prepare() means "this device appears
-	 * to be runtime-suspended and its state is fine, so if it really is
-	 * runtime-suspended, you can leave it in that state provided that you
-	 * will do the same thing with all of its descendants".  This only
-	 * applies to suspend transitions, however.
-	 */
-	spin_lock_irq(&dev->power.lock);
-	dev->power.direct_complete = ret > 0 && state.event == PM_EVENT_SUSPEND;
-	spin_unlock_irq(&dev->power.lock);
-	return 0;
+
+	return error;
 }
 
 /**
