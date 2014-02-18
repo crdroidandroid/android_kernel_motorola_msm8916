@@ -484,7 +484,8 @@ static int device_resume_noirq(struct device *dev, pm_message_t state, bool asyn
 	if (!dev->power.is_noirq_suspended)
 		goto Out;
 
-	dpm_wait(dev->parent, async);
+	if (!dev->power.is_noirq_suspended)
+		goto Out;
 
 	if (dev->pm_domain) {
 		info = "noirq power domain ";
@@ -608,8 +609,6 @@ static int device_resume_early(struct device *dev, pm_message_t state, bool asyn
 
 	if (!dev->power.is_late_suspended)
 		goto Out;
-
-	dpm_wait(dev->parent, async);
 
 	if (dev->pm_domain) {
 		info = "early power domain ";
@@ -1003,7 +1002,7 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 {
 	pm_callback_t callback = NULL;
 	char *info = NULL;
-	int error = 0;
+	int error;
 
 	if (async_error)
 		goto Complete;
@@ -1040,38 +1039,8 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 	error = dpm_run_callback(callback, dev, state, info);
 	if (!error)
 		dev->power.is_noirq_suspended = true;
-	else
-		async_error = error;
 
-Complete:
-	complete_all(&dev->power.completion);
 	return error;
-}
-
-static void async_suspend_noirq(void *data, async_cookie_t cookie)
-{
-	struct device *dev = (struct device *)data;
-	int error;
-
-	error = __device_suspend_noirq(dev, pm_transition, true);
-	if (error) {
-		dpm_save_failed_dev(dev_name(dev));
-		pm_dev_err(dev, pm_transition, " async", error);
-	}
-
-	put_device(dev);
-}
-
-static int device_suspend_noirq(struct device *dev)
-{
-	INIT_COMPLETION(dev->power.completion);
-
-	if (pm_async_enabled && dev->power.async_suspend) {
-		get_device(dev);
-		async_schedule(async_suspend_noirq, dev);
-		return 0;
-	}
-	return __device_suspend_noirq(dev, pm_transition, false);
 }
 
 /**
@@ -1143,7 +1112,7 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 {
 	pm_callback_t callback = NULL;
 	char *info = NULL;
-	int error = 0;
+	int error;
 
 	__pm_runtime_disable(dev, false);
 
@@ -1180,10 +1149,14 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 	}
 
 	error = dpm_run_callback(callback, dev, state, info);
-	if (!error)
-		dev->power.is_late_suspended = true;
+	if (error)
+		/*
+		 * dpm_resume_early wouldn't be run for this failed device,
+		 * hence enable runtime_pm now
+		 */
+		pm_runtime_enable(dev);
 	else
-		async_error = error;
+		dev->power.is_late_suspended = true;
 
 Complete:
 	complete_all(&dev->power.completion);
