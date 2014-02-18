@@ -1146,7 +1146,7 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 {
 	pm_callback_t callback = NULL;
 	char *info = NULL;
-	int error;
+	int error = 0;
 
 	__pm_runtime_disable(dev, false);
 
@@ -1158,7 +1158,7 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 		goto Complete;
 	}
 
-	if (dev->power.syscore || dev->power.direct_complete)
+	if (dev->power.syscore)
 		goto Complete;
 
 	dpm_wait_for_children(dev, async);
@@ -1183,14 +1183,10 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 	}
 
 	error = dpm_run_callback(callback, dev, state, info);
-	if (error)
-		/*
-		 * dpm_resume_early wouldn't be run for this failed device,
-		 * hence enable runtime_pm now
-		 */
-		pm_runtime_enable(dev);
-	else
+	if (!error)
 		dev->power.is_late_suspended = true;
+	else
+		async_error = error;
 
 Complete:
 	complete_all(&dev->power.completion);
@@ -1264,8 +1260,6 @@ static int dpm_suspend_late(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-	if (!error)
-		error = async_error;
 	if (error) {
 		suspend_stats.failed_suspend_late++;
 		dpm_save_failed_step(SUSPEND_SUSPEND_LATE);
