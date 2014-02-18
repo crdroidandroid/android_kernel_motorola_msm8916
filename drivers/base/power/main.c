@@ -1006,7 +1006,7 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 {
 	pm_callback_t callback = NULL;
 	char *info = NULL;
-	int error;
+	int error = 0;
 
 	if (async_error)
 		goto Complete;
@@ -1016,7 +1016,7 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 		goto Complete;
 	}
 
-	if (dev->power.syscore || dev->power.direct_complete)
+	if (dev->power.syscore)
 		goto Complete;
 
 	dpm_wait_for_children(dev, async);
@@ -1043,8 +1043,38 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 	error = dpm_run_callback(callback, dev, state, info);
 	if (!error)
 		dev->power.is_noirq_suspended = true;
+	else
+		async_error = error;
 
+Complete:
+	complete_all(&dev->power.completion);
 	return error;
+}
+
+static void async_suspend_noirq(void *data, async_cookie_t cookie)
+{
+	struct device *dev = (struct device *)data;
+	int error;
+
+	error = __device_suspend_noirq(dev, pm_transition, true);
+	if (error) {
+		dpm_save_failed_dev(dev_name(dev));
+		pm_dev_err(dev, pm_transition, " async", error);
+	}
+
+	put_device(dev);
+}
+
+static int device_suspend_noirq(struct device *dev)
+{
+	INIT_COMPLETION(dev->power.completion);
+
+	if (pm_async_enabled && dev->power.async_suspend) {
+		get_device(dev);
+		async_schedule(async_suspend_noirq, dev);
+		return 0;
+	}
+	return __device_suspend_noirq(dev, pm_transition, false);
 }
 
 /**
