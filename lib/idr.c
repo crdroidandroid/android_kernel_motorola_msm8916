@@ -590,7 +590,7 @@ static void __idr_remove_all(struct idr *idp)
 	struct idr_layer **paa = &pa[0];
 
 	n = idp->layers * IDR_BITS;
-	*paa = idp->top;
+	p = idp->top;
 	RCU_INIT_POINTER(idp->top, NULL);
 	max = idr_max(idp->layers);
 
