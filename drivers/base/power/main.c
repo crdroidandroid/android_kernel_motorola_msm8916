@@ -484,9 +484,6 @@ static int device_resume_noirq(struct device *dev, pm_message_t state, bool asyn
 	if (!dev->power.is_noirq_suspended)
 		goto Out;
 
-	if (!dev->power.is_noirq_suspended)
-		goto Out;
-
 	dpm_wait(dev->parent, async);
 
 	if (dev->pm_domain) {
@@ -1016,7 +1013,7 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 		goto Complete;
 	}
 
-	if (dev->power.syscore)
+	if (dev->power.syscore || dev->power.direct_complete)
 		goto Complete;
 
 	dpm_wait_for_children(dev, async);
@@ -1158,7 +1155,7 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 		goto Complete;
 	}
 
-	if (dev->power.syscore)
+	if (dev->power.syscore || dev->power.direct_complete)
 		goto Complete;
 
 	dpm_wait_for_children(dev, async);
@@ -1353,7 +1350,7 @@ static int __device_suspend(struct device *dev, pm_message_t state, bool async)
 	if (dev->power.direct_complete) {
 		if (pm_runtime_status_suspended(dev)) {
 			pm_runtime_disable(dev);
-			if (pm_runtime_status_suspended(dev))
+			if (pm_runtime_suspended_if_enabled(dev))
 				goto Complete;
 
 			pm_runtime_enable(dev);
@@ -1562,10 +1559,22 @@ static int device_prepare(struct device *dev, pm_message_t state)
 
 	device_unlock(dev);
 
-	if (error)
+	if (ret < 0) {
+		suspend_report_result(callback, ret);
 		pm_runtime_put(dev);
-
-	return error;
+		return ret;
+	}
+	/*
+	 * A positive return value from ->prepare() means "this device appears
+	 * to be runtime-suspended and its state is fine, so if it really is
+	 * runtime-suspended, you can leave it in that state provided that you
+	 * will do the same thing with all of its descendants".  This only
+	 * applies to suspend transitions, however.
+	 */
+	spin_lock_irq(&dev->power.lock);
+	dev->power.direct_complete = ret > 0 && state.event == PM_EVENT_SUSPEND;
+	spin_unlock_irq(&dev->power.lock);
+	return 0;
 }
 
 /**
