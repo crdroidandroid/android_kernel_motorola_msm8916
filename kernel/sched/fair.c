@@ -3153,6 +3153,11 @@ void relay_ap(unsigned int ap)
  Larch_power = ap;
 }
 
+void relay_ap(unsigned int ap)
+{
+	Larch_power = ap;
+}
+
 static void
 place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 {
