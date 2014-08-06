@@ -182,7 +182,7 @@ int __bitmap_and(unsigned long *dst, const unsigned long *bitmap1,
 				const unsigned long *bitmap2, unsigned int bits)
 {
 	unsigned int k;
-	unsigned int lim = bits/BITS_PER_LONG;
+	unsigned int nr = BITS_TO_LONGS(bits);
 	unsigned long result = 0;
 
 	for (k = 0; k < lim; k++)
@@ -220,7 +220,7 @@ int __bitmap_andnot(unsigned long *dst, const unsigned long *bitmap1,
 				const unsigned long *bitmap2, unsigned int bits)
 {
 	unsigned int k;
-	unsigned int lim = bits/BITS_PER_LONG;
+	unsigned int nr = BITS_TO_LONGS(bits);
 	unsigned long result = 0;
 
 	for (k = 0; k < lim; k++)
