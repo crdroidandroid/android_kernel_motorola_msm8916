@@ -1216,7 +1216,6 @@ static int q6lsm_mmapcallback(struct apr_client_data *data, void *priv)
 		lsm_common.common_client[sid].lsm_cal_phy_addr = 0;
 		cal_utils_clear_cal_block_q6maps(LSM_MAX_CAL_IDX,
 			lsm_common.cal_data);
-		lsm_common.set_custom_topology = 1;
 		return 0;
 	}
 
