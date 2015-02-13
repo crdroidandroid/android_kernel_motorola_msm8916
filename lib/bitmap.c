@@ -157,7 +157,7 @@ void __bitmap_shift_left(unsigned long *dst, const unsigned long *src,
 			unsigned int shift, unsigned int nbits)
 {
 	int k;
-	unsigned int lim = BITS_TO_LONGS(nbits);
+	unsigned int lim = BITS_TO_LONGS(nbits), left = nbits % BITS_PER_LONG;
 	unsigned int off = shift/BITS_PER_LONG, rem = shift % BITS_PER_LONG;
 	for (k = lim - off - 1; k >= 0; --k) {
 		unsigned long upper, lower;
