@@ -111,9 +111,9 @@ EXPORT_SYMBOL(__bitmap_complement);
 void __bitmap_shift_right(unsigned long *dst, const unsigned long *src,
 			unsigned shift, unsigned nbits)
 {
-	unsigned k, lim = BITS_TO_LONGS(nbits);
+	unsigned k, lim = BITS_TO_LONGS(nbits), left = nbits % BITS_PER_LONG;
 	unsigned off = shift/BITS_PER_LONG, rem = shift % BITS_PER_LONG;
-	unsigned long mask = BITMAP_LAST_WORD_MASK(nbits);
+	unsigned long mask = (1UL << left) - 1;
 	for (k = 0; off + k < lim; ++k) {
 		unsigned long upper, lower;
 
