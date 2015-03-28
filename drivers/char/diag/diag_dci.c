@@ -2154,21 +2154,8 @@ struct diag_dci_client_tbl *dci_lookup_client_entry_pid(int tgid)
 
 	list_for_each_safe(start, temp, &driver->dci_client_list) {
 		entry = list_entry(start, struct diag_dci_client_tbl, track);
-		pid_struct = find_get_pid(entry->tgid);
-		if (!pid_struct) {
-			pr_err("diag: valid pid doesn't exist for pid = %d\n",
-				entry->tgid);
-			continue;
-		}
-		task_s = get_pid_task(pid_struct, PIDTYPE_PID);
-		if (!task_s) {
-			pr_err("diag: valid task doesn't exist for pid = %d\n",
-				entry->tgid);
-			continue;
-		}
-		if (task_s == entry->client)
-			if (entry->client->tgid == tgid)
-				return entry;
+		if (entry->client->tgid == tgid)
+			return entry;
 	}
 	return NULL;
 }
