@@ -287,7 +287,7 @@ static bool wq_power_efficient = true;
 static bool wq_power_efficient;
 #endif
 
-module_param_named(power_efficient, wq_power_efficient, bool, 0444);
+module_param_named(power_efficient, wq_power_efficient, bool, 0644);
 
 static bool wq_numa_enabled;		/* unbound NUMA affinity enabled */
 
@@ -1498,13 +1498,13 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 	}
 
 	dwork->wq = wq;
+	/* timer isn't guaranteed to run in this cpu, record earlier */
+	if (cpu == WORK_CPU_UNBOUND)
+		cpu = raw_smp_processor_id();
 	dwork->cpu = cpu;
 	timer->expires = jiffies + delay;
 
-	if (unlikely(cpu != WORK_CPU_UNBOUND))
-		add_timer_on(timer, cpu);
-	else
-		add_timer(timer);
+	add_timer_on(timer, cpu);
 }
 
 /**
@@ -4213,15 +4213,9 @@ struct workqueue_struct *__alloc_workqueue_key(const char *fmt,
 	struct workqueue_struct *wq;
 	struct pool_workqueue *pwq;
 
-	/*
-	 * Unbound && max_active == 1 used to imply ordered, which is no
-	 * longer the case on NUMA machines due to per-node pools.  While
-	 * alloc_ordered_workqueue() is the right way to create an ordered
-	 * workqueue, keep the previous behavior to avoid subtle breakages
-	 * on NUMA.
-	 */
-	if ((flags & WQ_UNBOUND) && max_active == 1)
-		flags |= __WQ_ORDERED;
+	/* see the comment above the definition of WQ_POWER_EFFICIENT */
+	if ((flags & WQ_POWER_EFFICIENT) && wq_power_efficient)
+		flags |= WQ_UNBOUND;
 
 	/* allocate wq and format name */
 	if (flags & WQ_UNBOUND)
@@ -5145,3 +5139,4 @@ static int __init init_workqueues(void)
 	return 0;
 }
 early_initcall(init_workqueues);
+
