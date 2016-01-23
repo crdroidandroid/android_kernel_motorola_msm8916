@@ -1139,4 +1139,7 @@ config TOUCHBOOST_CONTROL
 	help
           Simple Touch Boost Driver.
 
+config TOUCHSCREEN_DOUBLETAP2WAKE
+	tristate "DoubleTap2Wake for touchscreens"
+	default n
 endif
