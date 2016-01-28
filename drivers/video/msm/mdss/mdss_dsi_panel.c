@@ -83,7 +83,6 @@ static void mdss_dsi_panel_bl_on_defer_wait(struct mdss_dsi_ctrl_pdata *ctrl)
 	}
 }
 
-
 bool display_on = true;
 
 bool is_display_on()
@@ -880,7 +879,6 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
-
 
 	display_on = true;
 
