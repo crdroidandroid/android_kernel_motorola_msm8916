@@ -170,8 +170,13 @@ void __bitmap_shift_left(unsigned long *dst, const unsigned long *src,
 			lower = src[k - 1] >> (BITS_PER_LONG - rem);
 		else
 			lower = 0;
-		upper = src[k] << rem;
+		upper = src[k];
+		if (left && k == lim - 1)
+			upper &= (1UL << left) - 1;
+		upper <<= rem;
 		dst[k + off] = lower | upper;
+		if (left && k + off == lim - 1)
+			dst[k + off] &= (1UL << left) - 1;
 	}
 	if (off)
 		memset(dst, 0, off*sizeof(unsigned long));
