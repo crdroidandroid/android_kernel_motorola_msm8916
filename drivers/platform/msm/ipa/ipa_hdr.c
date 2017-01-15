@@ -754,7 +754,7 @@ static int __ipa_del_hdr_proc_ctx(u32 proc_ctx_hdl,
 		htbl->proc_ctx_cnt, entry->offset_entry->offset);
 
 	if (by_user && entry->user_deleted) {
-		IPAERR_RL("proc_ctx already deleted by user\n");
+		IPAERR("proc_ctx already deleted by user\n");
 		return -EINVAL;
 	}
 
@@ -809,17 +809,8 @@ int __ipa_del_hdr(u32 hdr_hdl, bool by_user)
 		return -EINVAL;
 	}
 
-	if (by_user) {
-		if (!strcmp(entry->name, IPA_LAN_RX_HDR_NAME)) {
-			IPADBG("Trying to delete hdr %s offset=%u\n",
-				entry->name, entry->offset_entry->offset);
-			if (!entry->offset_entry->offset) {
-				IPAERR("User cannot delete default header\n");
-				return -EPERM;
-			}
-		}
+	if (by_user)
 		entry->user_deleted = true;
-	}
 
 	if (--entry->ref_cnt) {
 		IPADBG("hdr_hdl %x ref_cnt %d\n", hdr_hdl, entry->ref_cnt);
@@ -916,7 +907,7 @@ int ipa_del_hdr_by_user(struct ipa_ioc_del_hdr *hdls, bool by_user)
 	mutex_lock(&ipa_ctx->lock);
 	for (i = 0; i < hdls->num_hdls; i++) {
 		if (__ipa_del_hdr(hdls->hdl[i].hdl, by_user)) {
-			IPAERR_RL("failed to del hdr %i\n", i);
+			IPAERR("failed to del hdr %i\n", i);
 			hdls->hdl[i].status = -1;
 		} else {
 			hdls->hdl[i].status = 0;
@@ -1020,7 +1011,7 @@ int ipa_del_hdr_proc_ctx_by_user(struct ipa_ioc_del_hdr_proc_ctx *hdls,
 	mutex_lock(&ipa_ctx->lock);
 	for (i = 0; i < hdls->num_hdls; i++) {
 		if (__ipa_del_hdr_proc_ctx(hdls->hdl[i].hdl, true, by_user)) {
-			IPAERR_RL("failed to del hdr %i\n", i);
+			IPAERR("failed to del hdr %i\n", i);
 			hdls->hdl[i].status = -1;
 		} else {
 			hdls->hdl[i].status = 0;
