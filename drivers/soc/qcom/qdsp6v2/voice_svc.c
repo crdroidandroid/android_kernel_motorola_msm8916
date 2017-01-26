@@ -589,6 +589,7 @@ static ssize_t voice_svc_read(struct file *file, char __user *arg,
 				spin_flags);
 
 	ret = count;
+
 unlock:
 	mutex_unlock(&prtd->response_mutex_lock);
 done:
@@ -718,6 +719,7 @@ static int voice_svc_release(struct inode *inode, struct file *file)
 			pr_err("%s: Failed to dereg MVM %d\n", __func__, ret);
 	}
 
+	mutex_lock(&prtd->response_mutex_lock);
 	spin_lock_irqsave(&prtd->response_lock, spin_flags);
 
 	while (!list_empty(&prtd->response_queue)) {
