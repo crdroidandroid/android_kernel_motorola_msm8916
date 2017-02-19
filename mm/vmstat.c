@@ -746,6 +746,8 @@ const char * const vmstat_text[] = {
 	"nr_ion_pool",
 	"nr_ion_cma",
 	"nr_swapcache",
+
+	/* enum writeback_stat_item counters */
 #ifdef CONFIG_UKSM
 	"nr_uksm_zero_pages",
 #endif
