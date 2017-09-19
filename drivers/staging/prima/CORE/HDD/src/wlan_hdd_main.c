@@ -13966,11 +13966,6 @@ void hdd_softap_sta_disassoc(hdd_adapter_t *pAdapter,v_U8_t *pDestMacAddress)
 
     hddLog( LOGE, "hdd_softap_sta_disassoc:(%pK, false)", (WLAN_HDD_GET_CTX(pAdapter))->pvosContext);
 
-    if (!pSapCtx) {
-        hddLog(LOGE, "sap context is NULL");
-        return ;
-    }
-
     //Ignore request to disassoc bcmc station
     if( pDestMacAddress[0] & 0x1 )
        return;
