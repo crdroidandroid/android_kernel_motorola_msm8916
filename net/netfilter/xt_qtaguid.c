@@ -2269,6 +2269,22 @@ static int ctrl_cmd_tag(const char *input)
 			 "st@%p ...->f_count=%ld\n",
 			 input, el_socket->sk, sock_tag_entry,
 			 atomic_long_read(&el_socket->file->f_count));
+
+		/*
+		 * The tagged socket should be the same as the one from this
+		 * sockfd_lookup(). Otherwise, some unexpected error happens,
+		 * we just put back this ref and return.
+		 */
+		if (sock_tag_entry->socket != el_socket) {
+			pr_err("qtaguid: ctrl_tag(%s): "
+			       "socket mismatch\n",
+			       input);
+			spin_unlock_bh(&sock_tag_list_lock);
+			spin_unlock_bh(&uid_tag_data_tree_lock);
+			res = -EINVAL;
+			goto err_put;
+		}
+
 		/*
 		 * This is a re-tagging, so release the sock_fd that was
 		 * locked at the time of the 1st tagging.
@@ -2303,8 +2319,7 @@ static int ctrl_cmd_tag(const char *input)
 		sock_tag_entry->sk = el_socket->sk;
 		sock_tag_entry->socket = el_socket;
 		sock_tag_entry->pid = current->tgid;
-		sock_tag_entry->tag = combine_atag_with_uid(acct_tag,
-							    uid);
+		sock_tag_entry->tag = combine_atag_with_uid(acct_tag, uid);
 		pqd_entry = proc_qtu_data_tree_search(
 			&proc_qtu_data_tree, current->tgid);
 		/*
