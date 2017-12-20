@@ -93,13 +93,6 @@ static inline uint32_t buf_page_size(uint32_t size)
 	return sz > PAGE_SIZE ? sz : PAGE_SIZE;
 }
 
-static inline uint64_t ptr_to_uint64(void *ptr)
-{
-	uint64_t addr = (uint64_t)((uintptr_t)ptr);
-
-	return addr;
-}
-
 static inline int buf_get_pages(void *addr, size_t sz, int nr_pages,
 				int access, struct smq_phy_page *pages,
 				int nr_elems, struct smq_phy_page *range)
@@ -520,7 +513,7 @@ static int context_alloc(struct fastrpc_apps *me, uint32_t kernel,
 				struct file_data *fdata,
 				struct smq_invoke_ctx **po)
 {
-	int err = 0, bufs, ii, size = 0;
+	int err = 0, bufs, size = 0;
 	struct smq_invoke_ctx *ctx = NULL;
 	struct smq_context_list *clst = &me->clst;
 
