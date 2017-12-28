@@ -20583,13 +20583,11 @@ static tANI_U32 UnpackCore(tpAniSirGlobal pCtx,
             if ((nBufRemaining < pIe->minSize - pIe->noui - 2U) ||
                 (len < pIe->minSize - pIe->noui - 2U))
             {
-                FRAMES_LOG4(pCtx, FRLOGW, FRFL("The IE %s must "
+                FRAMES_LOG3(pCtx, FRLOGW, FRFL("The IE %s must "
                    "be at least %d bytes in size, but "
                    "there are only %d bytes remaining in "
-                   "this frame or the IE reports a size "
-                   "of %d bytes.\n"),
-                    pIe->name, pIe->minSize, nBufRemaining,
-                    (len + pIe->noui + 2U));
+                   "this frame or the IE reports a bad size.\n"),
+                    pIe->name, pIe->minSize, nBufRemaining);
                 FRAMES_DUMP(pCtx, FRLOG1, pBuf, nBuf);
                 status |= DOT11F_INCOMPLETE_IE;
                 FRAMES_DBG_BREAK();
