@@ -60,7 +60,6 @@
 			if (!kernel)\
 				up_read(&current->mm->mmap_sem);\
 		} while (0)
-
 #define FASTRPC_CTX_MAGIC (0xbeeddeed)
 #define FASTRPC_CTX_MAX (256)
 #define FASTRPC_CTXID_MASK (0xFF0)
@@ -91,6 +90,12 @@ static inline uint32_t buf_page_size(uint32_t size)
 {
 	uint32_t sz = (size + (PAGE_SIZE - 1)) & PAGE_MASK;
 	return sz > PAGE_SIZE ? sz : PAGE_SIZE;
+}
+
+static inline uint64_t ptr_to_uint64(void *ptr)
+{
+	uint64_t addr = (uint64_t)((uintptr_t)ptr);
+	return addr;
 }
 
 static inline int buf_get_pages(void *addr, size_t sz, int nr_pages,
@@ -513,7 +518,7 @@ static int context_alloc(struct fastrpc_apps *me, uint32_t kernel,
 				struct file_data *fdata,
 				struct smq_invoke_ctx **po)
 {
-	int err = 0, bufs, size = 0;
+	int err = 0, bufs, ii, size = 0;
 	struct smq_invoke_ctx *ctx = NULL;
 	struct smq_context_list *clst = &me->clst;
 
@@ -611,6 +616,7 @@ static void add_dev(struct fastrpc_apps *me, struct fastrpc_device *dev);
 static void context_free(struct smq_invoke_ctx *ctx, int remove)
 {
 	struct smq_context_list *clst = &ctx->apps->clst;
+	struct fastrpc_apps *me = &gfa;
 	struct fastrpc_apps *apps = ctx->apps;
 	struct ion_client *clnt = apps->iclient;
 	int cid = ctx->fdata->cid;
@@ -660,6 +666,17 @@ static void context_free(struct smq_invoke_ctx *ctx, int remove)
 		hlist_del(&ctx->hn);
 		spin_unlock(&clst->hlock);
 	}
+	ctx->magic = 0;
+	ctx->ctxid = 0;
+
+	spin_lock(&me->ctxlock);
+	for (i = 0; i < FASTRPC_CTX_MAX; i++) {
+		if (me->ctxtable[i] == ctx) {
+			me->ctxtable[i] = NULL;
+			break;
+		}
+	}
+	spin_unlock(&me->ctxlock);
 	kfree(ctx->overps);
 	kfree(ctx->overs);
 	kfree(ctx);
