@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 3.10.108 Kernel Configuration
+# Linux/arm 3.10.108-r22c Kernel Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_HAS_SG_CHAIN=y
@@ -3261,6 +3261,7 @@ CONFIG_QCOM_TDLS=y
 CONFIG_QCOM_VOWIFI_11R=y
 CONFIG_ENABLE_LINUX_REG=y
 # CONFIG_WLAN_OFFLOAD_PACKETS is not set
+CONFIG_QCOM_TDLS=y
 
 #
 # Qualcomm MSM specific device drivers
@@ -3360,7 +3361,6 @@ CONFIG_ARM_GIC=y
 CONFIG_MSM_SHOW_RESUME_IRQ=y
 CONFIG_MSM_IRQ=y
 # CONFIG_IPACK_BUS is not set
-# CONFIG_MOBICORE_SUPPORT is not set
 # CONFIG_RESET_CONTROLLER is not set
 # CONFIG_CORESIGHT is not set
 # CONFIG_BIF is not set
