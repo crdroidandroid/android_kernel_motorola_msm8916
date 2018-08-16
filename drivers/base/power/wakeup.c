@@ -48,9 +48,6 @@ static void wakeup_source_deactivate(struct wakeup_source *ws);
 #ifdef CONFIG_BOEFFLA_WL_BLOCKER
 #include "boeffla_wl_blocker.h"
 
-char list_wl_search[LENGTH_LIST_WL_SEARCH] = {0};
-bool wl_blocker_active = false;
-bool wl_blocker_debug = false;
 
 static void wakeup_source_deactivate(struct wakeup_source *ws);
 #endif
