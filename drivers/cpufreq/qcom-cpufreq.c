@@ -250,9 +250,9 @@ static int msm_cpufreq_suspend(void)
 
 static int msm_cpufreq_resume(void)
 {
-	int cpu = 0;
+	int cpu;
 #ifndef CONFIG_CPU_BOOST
-	int ret = 0;
+	int ret;
 	struct cpufreq_policy policy;
 #endif
 

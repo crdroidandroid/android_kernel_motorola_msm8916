@@ -75,7 +75,7 @@
 
 #define ATTR_RANGE_PATH 1
 
-#define ALSPS_DEBUG 1
+#define ALSPS_DEBUG 0
 /******************************************************************************
  * ALS / PS define
  *****************************************************************************/
@@ -1712,7 +1712,6 @@ static void epl_sensor_eint_work(struct work_struct *work)
 
 	LOG_INFO("xxxxxxxxxxx\n\n");
 
-	wake_lock_timeout(&ps_lock, msecs_to_jiffies(2000));
 	epl_sensor_read_ps(epld->client);
 	epl_sensor_read_als(epld->client);
 	if (epl_sensor.ps.interrupt_flag == EPL_INT_TRIGGER) {
@@ -1744,10 +1743,13 @@ static void epl_sensor_eint_work(struct work_struct *work)
 				buf[1] = gRawData.raw_bytes[1];
 				read_h_thd = (buf[1]<<8) | buf[0];
 
-				if (read_h_thd == ps_thd_1cm) {
-					ps_status_moto = 1;
-				} else  {
+				if (read_h_thd == ps_thd_3cm) {
 					ps_status_moto = 3;
+					epl_sensor_I2C_Write(epld->client,
+						0x1b,
+						EPL_CMP_RESET | EPL_UN_LOCK);
+				} else  {
+					ps_status_moto = 1;
 					epl_sensor_I2C_Write(epld->client,
 						0x1b,
 						EPL_CMP_RESET | EPL_UN_LOCK);
@@ -1762,6 +1764,7 @@ static void epl_sensor_eint_work(struct work_struct *work)
 		mutex_unlock(&sensor_mutex);
 
 		if (enable_ps) {
+			wake_lock_timeout(&ps_lock, msecs_to_jiffies(100));
 			epl_sensor_report_ps_status();
 		}
 		/* PS unlock interrupt pin and restart chip */
@@ -1779,12 +1782,12 @@ static void epl_sensor_eint_work(struct work_struct *work)
 	}
 	if (enable_stowed_flag == false) {
 		if ((epl_sensor.ps.compare_low >> 3) == 0) {
-			if (read_h_thd == ps_thd_1cm) {
-				set_psensor_intr_threshold(ps_thd_5cm,
-					ps_thd_3cm);
-			} else {
+			if (read_h_thd == ps_thd_3cm) {
 				set_psensor_intr_threshold(ps_thd_5cm,
 					ps_thd_1cm);
+			} else {
+				set_psensor_intr_threshold(ps_thd_5cm,
+					ps_thd_3cm);
 			}
 		} else {
 			epl_sensor_do_ps_auto_k_one(true);

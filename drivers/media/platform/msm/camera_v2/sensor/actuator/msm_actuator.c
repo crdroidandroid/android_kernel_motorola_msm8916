@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2015, 2018 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -93,21 +93,18 @@ static int32_t msm_actuator_piezo_set_default_focus(
 static void msm_actuator_parse_i2c_params(struct msm_actuator_ctrl_t *a_ctrl,
 	int16_t next_lens_position, uint32_t hw_params, uint16_t delay)
 {
-	struct msm_actuator_reg_params_t *write_arr = a_ctrl->reg_tbl;
+	struct msm_actuator_reg_params_t *write_arr = NULL;
 	uint32_t hw_dword = hw_params;
 	uint16_t i2c_byte1 = 0, i2c_byte2 = 0;
 	uint16_t value = 0;
-	uint32_t size = a_ctrl->reg_tbl_size, i = 0;
-	struct msm_camera_i2c_reg_array *i2c_tbl = a_ctrl->i2c_reg_tbl;
+	uint32_t size = 0, i = 0;
+	struct msm_camera_i2c_reg_array *i2c_tbl = NULL;
 	CDBG("Enter\n");
 
-	if (a_ctrl == NULL) {
-		pr_err("failed. actuator ctrl is NULL");
-		return;
-	}
-
-	if (a_ctrl->i2c_reg_tbl == NULL) {
-		pr_err("failed. i2c reg tabl is NULL");
+	if ((!a_ctrl) ||
+		(!a_ctrl->reg_tbl) ||
+		(!a_ctrl->i2c_reg_tbl)) {
+		pr_err("failed. NULL actuator pointers");
 		return;
 	}
 
@@ -671,6 +668,8 @@ static int32_t msm_actuator_move_focus(
 		a_ctrl->curr_step_pos, dest_step_pos, curr_lens_pos);
 
 	while (a_ctrl->curr_step_pos != dest_step_pos) {
+		if (a_ctrl->curr_region_index >= a_ctrl->region_size)
+			break;
 		step_boundary =
 			a_ctrl->region_params[a_ctrl->curr_region_index].
 			step_bound[dir];
@@ -767,6 +766,8 @@ static int32_t msm_actuator_bivcm_move_focus(
 		a_ctrl->curr_step_pos, dest_step_pos, curr_lens_pos);
 
 	while (a_ctrl->curr_step_pos != dest_step_pos) {
+		if (a_ctrl->curr_region_index >= a_ctrl->region_size)
+			break;
 		step_boundary =
 			a_ctrl->region_params[a_ctrl->curr_region_index].
 			step_bound[dir];
