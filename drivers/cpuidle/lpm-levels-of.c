@@ -638,6 +638,7 @@ static int calculate_residency(struct power_params *base_pwr,
 
 static int parse_cpu_levels(struct device_node *node, struct lpm_cluster *c)
 {
+	int i; int j;
 	struct device_node *n;
 	int ret = -ENOMEM;
 

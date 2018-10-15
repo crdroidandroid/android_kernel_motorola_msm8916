@@ -59,6 +59,7 @@ struct q6core_str {
 	struct cal_type_data *cal_data[CORE_MAX_CAL];
 	uint32_t mem_map_cal_handle;
 	int32_t adsp_status;
+	u32 q6_core_avs_version;
 };
 
 static struct q6core_str q6core_lcl;
