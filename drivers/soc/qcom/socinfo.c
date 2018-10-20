@@ -875,7 +875,6 @@ msm_set_image_variant(struct device *dev,
 	up_read(&current_image_rwsem);
 	store_address += SMEM_IMAGE_VERSION_VARIANT_OFFSET;
 	i = snprintf(store_address, SMEM_IMAGE_VERSION_VARIANT_SIZE, "%-.20s", buf);
-	WARN_ON(i >= SMEM_IMAGE_VERSION_VARIANT_SIZE);
 	return count;
 }
 
