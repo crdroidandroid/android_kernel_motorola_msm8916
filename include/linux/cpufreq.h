@@ -503,4 +503,6 @@ int cpufreq_stats_get_max_state(int cpu);
 void update_freq_table(unsigned int* freq_table, int cpu,
 		       unsigned int max_state);
 #endif
+extern bool video_is_playing;
+
 #endif /* _LINUX_CPUFREQ_H */

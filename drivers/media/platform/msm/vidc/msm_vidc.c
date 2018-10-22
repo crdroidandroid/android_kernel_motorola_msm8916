@@ -20,9 +20,13 @@
 #include "msm_venc.h"
 #include "msm_vidc_common.h"
 #include <linux/delay.h>
+#include <linux/cpufreq.h>
+
 #include "vidc_hfi_api.h"
 
 #define MAX_EVENTS 30
+
+bool video_is_playing;
 
 static int get_poll_flags(void *instance)
 {
@@ -1356,6 +1360,8 @@ void *msm_vidc_open(int core_id, int session_type)
 		goto fail_setup;
 	}
 
+	video_is_playing = true;
+
 	return inst;
 
 fail_setup:
@@ -1485,6 +1491,8 @@ int msm_vidc_close(void *instance)
 	pr_info(VIDC_DBG_TAG "Closed video instance: %pK\n",
 			VIDC_MSG_PRIO2STRING(VIDC_INFO), inst);
 	kfree(inst);
+
+	video_is_playing = false;
 
 	return 0;
 }
