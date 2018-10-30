@@ -600,6 +600,9 @@ KBUILD_CFLAGS   += $(call cc-disable-warning,format-truncation,)
 # Needed to unbreak GCC 7.x and above
 KBUILD_CFLAGS   += $(call cc-option,-fno-store-merging,)
 
+# Align memory adresses
+KBUILD_CFLAGS	+= $(call cc-option,-mstrict-align,)
+
 include $(srctree)/arch/$(SRCARCH)/Makefile
 
 ifdef CONFIG_READABLE_ASM
