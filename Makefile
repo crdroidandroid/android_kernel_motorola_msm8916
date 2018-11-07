@@ -386,7 +386,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		   -std=gnu89 $(call cc-option,-fno-PIE) \
-		   -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53 -fdiagnostics-color=always \
+		   -fdiagnostics-color=always \
 		   -Wno-maybe-uninitialized -Wno-unused-variable -Wno-unused-function -Wno-unused-label \
 		   -Wno-array-bounds -Wno-parentheses -Wno-format
 
@@ -597,7 +597,7 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 
 # Optimiztions
 KBUILD_CFLAGS	+= -Ofast
-KBUILD_CFLAGS	+= -fsanitize=leak -g0 -DNDEBUG $(GRAPHITE)
+KBUILD_CFLAGS	+= -g0 -DNDEBUG $(GRAPHITE)
 
 # Disable all maybe-uninitialized warnings
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
