@@ -832,13 +832,6 @@ void pm_print_active_wakeup_sources(void)
 }
 #endif
 
-#ifdef CONFIG_BOEFFLA_WL_BLOCKER
-void pm_print_active_wakeup_sources(void)
-{
-	print_active_wakeup_sources();
-}
-#endif
-
 /**
  * pm_wakeup_pending - Check if power transition in progress should be aborted.
  *
