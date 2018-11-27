@@ -464,12 +464,12 @@ static int chg_time[] = {
 };
 
 static int input_current_limit[] = {
-	300, 400, 450, 500, 600, 700, 800, 850, 900,
-	950, 1000, 1100, 1200, 1300, 1400, 1500,
+	750, 800, 850, 900, 950, 1000, 1050, 1100, 1150,
+	1200, 1250, 1300, 1350, 1400, 1450, 1500,
 };
 
 static int fastchg_current[] = {
-	1000, 1100, 1250, 1300, 1350, 1400, 1450, 1500,
+	1100, 1200, 1250, 1300, 1350, 1400, 1450, 1500,
 };
 
 static void smb1360_stay_awake(struct smb1360_wakeup_source *source,
@@ -1999,8 +1999,10 @@ static void smb1360_external_power_changed(struct power_supply *psy)
 	if (rc < 0)
 		dev_err(chip->dev,
 			"could not read USB current_max property, rc=%d\n", rc);
+	else if (rc == 0)
+		current_limit = 0;
 	else
-		current_limit = prop.intval / 1000;
+		current_limit = 1500;
 
 	pr_debug("current_limit = %d\n", current_limit);
 
@@ -4641,7 +4643,7 @@ static int smb1360_parse_jeita_params(struct smb1360_chip *chip)
 	return rc;
 }
 
-#define MAX_PARALLEL_CURRENT		540
+#define MAX_PARALLEL_CURRENT 1500
 static int smb1360_parse_parallel_charging_params(struct smb1360_chip *chip)
 {
 	struct device_node *node = chip->dev->of_node;

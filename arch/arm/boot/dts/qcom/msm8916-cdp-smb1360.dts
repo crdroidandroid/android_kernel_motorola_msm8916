@@ -34,9 +34,17 @@
 
 			qcom,float-voltage-mv = <4200>;
 			qcom,iterm-ma = <100>;
+
+			qcom,otg-batt-curr-limit = <950>;
 			qcom,charging-disabled;
 			qcom,recharge-thresh-mv = <100>;
 			qcom,thermal-mitigation = <1500 700 600 0>;
+
+			qcom,warm-bat-ma = <600>;
+			qcom,cool-bat-ma = <1500>;
+			qcom,max-parallel-current-ma = <1500>;
+
+			qcom,parallel-charging-enabled;
 		};
 	};
 };
